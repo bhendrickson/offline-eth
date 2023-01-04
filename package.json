@@ -1,0 +1,15 @@
+{
+  "name": "offline-eth",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "offline-eth.js",
+  "bin": { "offline-eth": "offline-eth.js" },
+  "dependencies": {
+    "@ethereumjs/tx": "^4.0.2",
+    "web3": "^1.8.1"
+  },
+  "engines": {
+    "node": ">=14",
+    "npm": ">=7"
+  }
+}
