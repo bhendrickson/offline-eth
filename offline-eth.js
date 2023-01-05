@@ -183,7 +183,7 @@ async function do_make() {
 
   const common = new Common({ chain: chain });
   let tx = FeeMarketEIP1559Transaction.fromTxData(txData, { common })
-  console.log("\nUNSIGNED TRANSACTION: 0x" + tx.serialize().toString('hex'));
+  console.log("0x" + tx.serialize().toString('hex'));
 }
 
 async function do_print() {
