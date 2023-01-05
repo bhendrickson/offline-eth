@@ -143,3 +143,117 @@ offline-eth address
 
   Outputs the HEX_PUBLIC_ADDRESS for this key.
 ````
+
+
+EXAMPLE
+=======
+Here is an example using it to move some funds around
+
+````
+# First we make ourselves some keys using our offline-pc
+offline$ KEY_ONE=$(openssl rand -hex 32)
+offline$ KEY_TWO=$(openssl rand -hex 32)
+
+# If you print those keys, you'll just see some hex bytes
+offline$ echo $KEY_ONE
+13f8087e10f6a901c711526aa3de2f81f4a402da4cb389ac175929e04a36cd34
+
+# But now I've told you key, so I'll make myself a different one.
+offline$ KEY_ONE=$(openssl rand -hex 32)
+
+# let's see the public addresses for our new keys
+offline$ offline-eth address --key=$KEY_ONE
+0x34FE9C5F2964c1f4607b384327f07955B679beDf
+
+offline$ offline-eth address --key=$KEY_TWO
+0xb4d54Eb1d089D757f680a9A76383Acd02955F0DE
+
+# Suppose we got money into the first address, perhaps using a
+# faucet if on a test net, or by transfering ETH from an exchange
+# on mainnet. Here I've done it on the test net.
+
+# Now we'll transfer funds from our first address to our second address.
+
+# We use our online PC to make the transaction object.
+online$ offline-eth make-tx --from=0x34FE9C5F2964c1f4607b384327f07955B679beDf --to=0xb4d54Eb1d089D757f680a9A76383Acd02955F0DE --value-eth=0.01 --chain=sepolia
+0x02f083aa36a7800184a3e9ab8882520894b4d54eb1d089d757f680a9a76383acd02955f0de872386f26fc1000080c0808080
+
+# It is hard to read hex, so you might want to convert that to something
+# human readability to make sure it is what you expect
+online$ offline-eth print-tx --tx=0x02f083aa36a7800184a3e9ab8882520894b4d54eb1d089d757f680a9a76383acd02955f0de872386f26fc1000080c0808080
+TRANSACTION AS JSON
+{
+  chainId: '0xaa36a7',
+  nonce: '0x0',
+  maxPriorityFeePerGas: '0x1',
+  maxFeePerGas: '0xa3e9ab88',
+  gasLimit: '0x5208',
+  to: '0xb4d54eb1d089d757f680a9a76383acd02955f0de',
+  value: '0x2386f26fc10000',
+  data: '0x',
+  accessList: [],
+  v: '0x0',
+  r: undefined,
+  s: undefined
+}
+
+INFO ABOUT TRANSACTION
+  Is signed: false
+  Value: 10000000000000000 wei (0.01 eth)
+  Max gas fee: 57750000168000 wei (0.000057750000168 eth)
+
+# That does look right. Let's move back to our offline pc and sign it.
+offline$ offline-eth sign-tx --tx=0x02f083aa36a7800184a3e9ab8882520894b4d54eb1d089d757f680a9a76383acd02955f0de872386f26fc1000080c0808080 --key=$KEY_ONE
+0x02f87083aa36a7800184a3e9ab8882520894b4d54eb1d089d757f680a9a76383acd02955f0de872386f26fc1000080c080a0817a97c0a7843f3e22bbc737ce4467dae5d98ad8b1d1df2c5b1717aaa780b93aa05c7408c7090ba8226a024e60ec2e61bddc0837d354d549eee1e4f1d837d3121f
+
+# That hex blob is the signed version of the transaction. Again, we can print
+# it as something more human readable:
+offline$ offline-eth print-tx --tx=0x02f87083aa36a7800184a3e9ab8882520894b4d54eb1d089d757f680a9a76383acd02955f0de872386f26fc1000080c080a0817a97c0a7843f3e22bbc737ce4467dae5d98ad8b1d1df2c5b1717aaa780b93aa05c7408c7090ba8226a024e60ec2e61bddc0837d354d549eee1e4f1d837d3121f
+TRANSACTION AS JSON
+{
+  chainId: '0xaa36a7',
+  nonce: '0x0',
+  maxPriorityFeePerGas: '0x1',
+  maxFeePerGas: '0xa3e9ab88',
+  gasLimit: '0x5208',
+  to: '0xb4d54eb1d089d757f680a9a76383acd02955f0de',
+  value: '0x2386f26fc10000',
+  data: '0x',
+  accessList: [],
+  v: '0x0',
+  r: '0x817a97c0a7843f3e22bbc737ce4467dae5d98ad8b1d1df2c5b1717aaa780b93a',
+  s: '0x5c7408c7090ba8226a024e60ec2e61bddc0837d354d549eee1e4f1d837d3121f'
+}
+
+INFO ABOUT TRANSACTION
+  Is signed: true
+  'From' address implied by sig: 0x34fe9c5f2964c1f4607b384327f07955b679bedf
+  Value: 10000000000000000 wei (0.01 eth)
+  Max gas fee: 57750000168000 wei (0.000057750000168 eth)
+
+# Most fields are the same as before, although r and s are now filled as those
+# are part of the signature. From them, we can derive from the from address,
+# which is printed at the bottom in the INFO section.
+
+# Given the transaction looks good, let's move it back to the online PC and
+# send it to blockchain
+online$ offline-eth send-tx --chain=sepolia --tx=0x02f87083aa36a7800184a3e9ab8882520894b4d54eb1d089d757f680a9a76383acd02955f0de872386f26fc1000080c080a0817a97c0a7843f3e22bbc737ce4467dae5d98ad8b1d1df2c5b1717aaa780b93aa05c7408c7090ba8226a024e60ec2e61bddc0837d354d549eee1e4f1d837d3121f
+{
+  blockHash: '0x29319325ac3db23e9ba304cee46318b017ae201973d427230838ece1a8f3c772',
+  blockNumber: 2627449,
+  contractAddress: null,
+  cumulativeGasUsed: 21000,
+  effectiveGasPrice: 8,
+  from: '0x34fe9c5f2964c1f4607b384327f07955b679bedf',
+  gasUsed: 21000,
+  logs: [],
+  logsBloom: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+  status: true,
+  to: '0xb4d54eb1d089d757f680a9a76383acd02955f0de',
+  transactionHash: '0xadad33f79216b9a6e06b27c4d35643c268638fae0473514330d6ca8323171d56',
+  transactionIndex: 0,
+  type: '0x2'
+}
+
+# Success! We just moved some ETH around!
+````
