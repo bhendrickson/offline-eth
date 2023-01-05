@@ -5,55 +5,17 @@ import { Chain, Common, Hardfork } from '@ethereumjs/common'
 import { isValidChecksumAddress, unpadBuffer} from '@ethereumjs/util'
 import { FeeMarketEIP1559Transaction, TransactionFactory } from '@ethereumjs/tx'
 
-const kUsageText = `Usage: offline_eth <command> [<args>]
+const kUsageText = `usage: offline-eth <command> [<args>]
 
-A command line tool to create, sign, and submit Ethereum transactions. Its
-primary purpose is to allow you to sign transactions on an offline computer,
-improving the security of your ETH by isolating your keys and the signing
-process.
+A tool to create, sign, and submit Ethereum transactions, that works in such a
+way one can isolate keys & sigining to an offline computer. For more
+information, visit: http://github.com/bhendrickson/offline-eth
 
-This tool does not handle the transfer of unsigned or signed transaction data
-between online and offline computers. There are several ways to do this
-reasonably securely, such as using a USB drive, a LAN without internet access,
-or, if your offline and online computers are virtual machines on the same
-host, simply copying and pasting. Alternatively, you can use pen and paper for a
-low-tech option.
-
-In addition to providing isolation, the simplicity of this tool adds an
-additional layer of security. It is written in a few hundred lines of code and
-depends only on the widely-used and well-maintained libraries web3.js and
-ethereumjs, both maintained by the Ethereum Foundation.
-
-If you have feedback, suggestions for improvement, or would like to contribute,
-please visit the tool's GitHub page at:
-  http://github.com/bhendrickson/offline_eth
-
-Possible workflow for using this tool:
-  * [online PC] Use 'offline_eth make_tx' to create an unsigned transaction.
-  * [online PC] Use 'offline_eth print_tx' to verify that the unsigned
-    transaction is correct.
-  * Transfer the unsigned transaction from the [online PC] to the [offline PC].
-  * [offline PC] Use 'offline_eth sign_tx' to create a signed transaction.
-  * [offline PC] Use 'offline_eth print_tx' to verify that the signed
-    transaction.
-  * Transfer the signed transaction from the [offline PC] to the [online PC].
-  * [online PC] Use 'offline_eth print_tx' with the '--online' flag to verify
-    the signed transaction again.
-  * [online PC] Use 'offline_eth send_tx' to publish the transaction to the
-    blockchain.
-
-There is a risk that the offline PC may have been compromised by a sophisticated
-hacker before being taken offline. If so, to steal your funds, they could try to
-leak your secret key, or put the wrong transaction, in what it purports to be
-the hex of your signed transaction that you are moving back to an online PC.
-This scenario may seem unlikely, but it can be mitigated by inspecting the
-signed transaction on multiple offline PCs to ensure its accuracy.
-
-COMMANDS
-  make_tx          Makes an unsigned ETH transaction (*)
-  sign_tx          Adds a signature to an ETH transaction
-  print_tx         Prints an ETH transaction (**)
-  send_tx          Sends a signed ETH transaction (*)
+commands:
+  make-tx          Makes an unsigned ETH transaction (*)
+  sign-tx          Adds a signature to an ETH transaction
+  print-tx         Prints an ETH transaction (**)
+  send-tx          Sends a signed ETH transaction (*)
   balance          Prints balance and # transactions for an address (*)
   address          Prints the public address given a private key
 
@@ -61,16 +23,15 @@ COMMANDS
 (**) Command can optionaly use internet (or client connection) to display
      more data
 
-COMMAND ARGS AND OUTPUT
-offline_eth make_tx
+offline-eth make-tx
     --from=<HEX_PUBLIC_ADDRESS>                From where to send [Required]
     --to=<HEX_PUBLIC_ADDRESS>                  Where to send to [Required]
-    --value_eth=<DECIMAL|max>                  Amount to send
-                                                 [This or value_wei is required]
-    --value_wei=<INTEGER|max>                  Amount to send
-                                                 [This or value_eth is required]
+    --value-eth=<DECIMAL|max>                  Amount to send
+                                                 [This or value-wei is required]
+    --value-wei=<INTEGER|max>                  Amount to send
+                                                 [This or value-eth is required]
     --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client_url=<HTTP_ADDRESS>                URL of ETH client
+    --client-url=<HTTP_ADDRESS>                URL of ETH client
                                                  [Default: ankr.comr/rpc/...]
 
   Outputs a HEX_UNSIGNED_TRANSACTION, which encodes details about the desired
@@ -85,7 +46,7 @@ offline_eth make_tx
   at 10% above the median of recent blocks, and the priority fee is hardcoded
   to be 1 gwei.
 
-offline_eth sign_tx
+offline-eth sign-tx
     --tx=<HEX_UNSIGNED_TRANSACTION>            Transaction to sign [Required]
     --key=<HEX_PRIVATE_KEY>                    Key to sign with [Requred]
 
@@ -93,14 +54,14 @@ offline_eth sign_tx
   filling in several fields related to the signature. A signed transaction can
   be sent to the blockchain to be included.
 
-offline_eth print_tx
+offline-eth print-tx
     --tx=<HEX_UNSIGNED_TRANSACTION |           Transaction to print [Required]
           HEX_SIGNED_TRANSACTION>
     --online                                   If set, will use client_url to
                                                lookup up details about the
                                                addresses.
     --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client_url=<HTTP_ADDRESS>                URL of ETH client
+    --client-url=<HTTP_ADDRESS>                URL of ETH client
                                                  [Default: ankr.comr/rpc/...]
 
   Outputs the transaction in JSON and some human readable details about
@@ -111,25 +72,25 @@ offline_eth print_tx
   is looked up and displayed. That can help confirm the to and from address are
   correct.
 
-offline_eth send_tx
+offline-eth send-tx
     --tx=<HEX_SIGNED_TRANSACTION>              Transaction to send [Required]
     --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client_url=<HTTP_ADDRESS>                URL of ETH client
+    --client-url=<HTTP_ADDRESS>                URL of ETH client
                                                  [Default: ankr.comr/rpc/...]
 
   This uses the client_url to send the signed transaction to be included on the
   block chain.  It blocks until it is included, and prints details about the
   transaction's inclusion when it happens.
 
-offline_eth balance
+offline-eth balance
     --address=<HEX_PUBLIC_ADDRESS>             Address to lookup [Required]
     --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client_url=<HTTP_ADDRESS>                URL of ETH client
+    --client-url=<HTTP_ADDRESS>                URL of ETH client
                                                  [Default: ankr.comr/rpc/...]
 
   Outputs the balance and # of transaction for this address
 
-offline_eth address
+offline-eth address
     --key=<HEX_PRIVATE_KEY>                    Key to get address for
 
   Outputs the HEX_PUBLIC_ADDRESS for this key.
@@ -186,13 +147,13 @@ async function checkBalance(web3_conn, public_address) {
 async function do_make() {
   let from = take_arg(process.argv, "from", true);
   let to = take_arg(process.argv, "to", true);
-  let value_eth = take_arg(process.argv, "value_eth", false);
-  let value_wei = take_arg(process.argv, "value_wei", false);
+  let value_eth = take_arg(process.argv, "value-eth", false);
+  let value_wei = take_arg(process.argv, "value-wei", false);
   let chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client_url", false);
+  let client_url = take_arg(process.argv, "client-url", false);
   verify_no_extra_args(process.argv);
   if ((value_eth == undefined) == (value_wei == undefined)) {
-    exitWithUsage("must set 'value_eth' or 'value_wei' but not both");
+    exitWithUsage("must set 'value-eth' or 'value-wei' but not both");
   }
 
   if (!client_url) client_url = getEthClientUrl(chain);
@@ -229,7 +190,7 @@ async function do_print() {
   let tx_hex = take_arg(process.argv, "tx", true);
   let online = take_arg(process.argv, "online", false, false);
   let chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client_url", false);
+  let client_url = take_arg(process.argv, "client-url", false);
 
   verify_no_extra_args(process.argv);
   if (tx_hex.startsWith("0x")) tx_hex = tx_hex.slice(2);
@@ -279,7 +240,7 @@ async function do_sign() {
 
 async function do_send() {
   const chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client_url", false);
+  let client_url = take_arg(process.argv, "client-url", false);
   const tx_hex = take_arg(process.argv, "tx", true);
   verify_no_extra_args(process.argv);
   if (!client_url) client_url = getEthClientUrl(chain);
@@ -290,7 +251,7 @@ async function do_send() {
 
 async function do_balance() {
   const chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client_url", false);
+  let client_url = take_arg(process.argv, "client-url", false);
   const address = take_arg(process.argv, "address");
   verify_no_extra_args(process.argv);
   if (!client_url) client_url = getEthClientUrl(chain);
@@ -319,10 +280,10 @@ process.emit = function(name, data, ...args) {
 function main() {
   if (process.argv.includes("--help")) exitWithUsage();
   const action = process.argv[2];
-  if (action == "make_tx") return do_make();
-  if (action == "print_tx") return do_print();
-  if (action == "sign_tx") return do_sign();
-  if (action == "send_tx") return do_send();
+  if (action == "make-tx") return do_make();
+  if (action == "print-tx") return do_print();
+  if (action == "sign-tx") return do_sign();
+  if (action == "send-tx") return do_send();
   if (action == "balance") return do_balance();
   if (action == "address") return do_address();
   exitWithUsage("first arg must be an action");
