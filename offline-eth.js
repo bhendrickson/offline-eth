@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 import Web3 from 'web3';
-import { Chain, Common, Hardfork } from '@ethereumjs/common'
-import { isValidChecksumAddress, unpadBuffer} from '@ethereumjs/util'
+import { Common } from '@ethereumjs/common'
 import { FeeMarketEIP1559Transaction, TransactionFactory } from '@ethereumjs/tx'
 
 const kUsageText = `usage: offline-eth <command> [<args>]

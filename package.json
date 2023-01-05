@@ -5,6 +5,7 @@
   "main": "offline-eth.js",
   "bin": { "offline-eth": "offline-eth.js" },
   "dependencies": {
+    "@ethereumjs/common": "^3.0.2",
     "@ethereumjs/tx": "^4.0.2",
     "web3": "^1.8.1"
   },
