@@ -45,7 +45,7 @@ offline-eth make-tx
 
 offline-eth sign-tx
     --tx=<HEX_UNSIGNED_TRANSACTION>            Transaction to sign [Required]
-    --key=<HEX_PRIVATE_KEY>                    Key to sign with as base64 hex
+    --key=<HEX_PRIVATE_KEY>                    Key to sign with as hex string
                                                [Requred]
 
   Outputs a HEX_SIGNED_TRANSACTION, which extends the unsigned transaction by
