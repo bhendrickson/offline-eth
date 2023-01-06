@@ -30,9 +30,7 @@ offline-eth make-tx
                                                  [This or value-wei is required]
     --value-wei=<INTEGER|max>                  Amount to send
                                                  [This or value-eth is required]
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
   Outputs a HEX_UNSIGNED_TRANSACTION, which encodes details about the desired
   transaction. It cannot be sent to the block chain until it is signed by the
@@ -48,21 +46,20 @@ offline-eth make-tx
 
 offline-eth sign-tx
     --tx=<HEX_UNSIGNED_TRANSACTION>            Transaction to sign [Required]
-    --key=<HEX_PRIVATE_KEY>                    Key to sign with [Requred]
+    --key=<HEX_PRIVATE_KEY>                    Key to sign with as base64 hex
+                                               [Requred]
 
-  Outputs a HEX_SIGNED_TRANSACTION, which extends th unsigned transaction by
+  Outputs a HEX_SIGNED_TRANSACTION, which extends the unsigned transaction by
   filling in several fields related to the signature. A signed transaction can
   be sent to the blockchain to be included.
 
 offline-eth print-tx
     --tx=<HEX_UNSIGNED_TRANSACTION |           Transaction to print [Required]
           HEX_SIGNED_TRANSACTION>
-    --online                                   If set, will use client_url to
-                                               lookup up details about the
-                                               addresses.
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --online                                   If set, will lookup up details
+                                               about the addresses on the
+                                               --chain.
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
   Outputs the transaction in JSON and some human readable details about
   the transaction to help a human confirm this transaction is correct. The
@@ -74,19 +71,15 @@ offline-eth print-tx
 
 offline-eth send-tx
     --tx=<HEX_SIGNED_TRANSACTION>              Transaction to send [Required]
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
-  This uses the client_url to send the signed transaction to be included on the
-  block chain.  It blocks until it is included, and prints details about the
-  transaction's inclusion when it happens.
+  This sends the signed transaction to the block chain. It blocks until it is
+  included, and prints details about the transaction's inclusion when it
+  happens.
 
 offline-eth balance
     --address=<HEX_PUBLIC_ADDRESS>             Address to lookup [Required]
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
   Outputs the balance and # of transaction for this address
 
@@ -150,13 +143,12 @@ async function do_make() {
   let value_eth = take_arg(process.argv, "value-eth", false);
   let value_wei = take_arg(process.argv, "value-wei", false);
   let chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client-url", false);
+  let client_url = getEthClientUrl(chain);
   verify_no_extra_args(process.argv);
   if ((value_eth == undefined) == (value_wei == undefined)) {
     exitWithUsage("must set 'value-eth' or 'value-wei' but not both");
   }
 
-  if (!client_url) client_url = getEthClientUrl(chain);
   const web3 = new Web3(client_url);
 
   const from_tx_count = await web3.eth.getTransactionCount(from);
@@ -190,7 +182,7 @@ async function do_print() {
   let tx_hex = take_arg(process.argv, "tx", true);
   let online = take_arg(process.argv, "online", false, false);
   let chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client-url", false);
+  let client_url = getEthClientUrl(chain);
 
   verify_no_extra_args(process.argv);
   if (tx_hex.startsWith("0x")) tx_hex = tx_hex.slice(2);
@@ -212,7 +204,6 @@ async function do_print() {
   console.log("  Max gas fee: " + max_fee + " wei (" + max_fee_eth + " eth)");
 
   if (!online) return;
-  if (!client_url) client_url = getEthClientUrl(chain);
   const web3 = new Web3(client_url);
 
   if (from) {
@@ -240,10 +231,9 @@ async function do_sign() {
 
 async function do_send() {
   const chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client-url", false);
+  let client_url = getEthClientUrl(chain)
   const tx_hex = take_arg(process.argv, "tx", true);
   verify_no_extra_args(process.argv);
-  if (!client_url) client_url = getEthClientUrl(chain);
   const web3 = new Web3(client_url);
   let out = await web3.eth.sendSignedTransaction(tx_hex);
   console.log(out);
@@ -251,10 +241,9 @@ async function do_send() {
 
 async function do_balance() {
   const chain = take_arg(process.argv, "chain", false, "mainnet");
-  let client_url = take_arg(process.argv, "client-url", false);
+  let client_url = getEthClientUrl(chain);
   const address = take_arg(process.argv, "address");
   verify_no_extra_args(process.argv);
-  if (!client_url) client_url = getEthClientUrl(chain);
   const web3 = new Web3(client_url);
   console.log(await checkBalance(web3, address));
 }

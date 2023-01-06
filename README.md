@@ -46,13 +46,13 @@ INSTALLATION
 ============
 
 You can install it by running:
-````
+```
   npm install -g https://github.com/bhendrickson/offline-eth
-````
+```
 
 USAGE
 =====
-````
+```
 usage: offline-eth <command> [<args>]
 
 A tool to create, sign, and submit Ethereum transactions, that works in such a
@@ -78,9 +78,7 @@ offline-eth make-tx
                                                  [This or value-wei is required]
     --value-wei=<INTEGER|max>                  Amount to send
                                                  [This or value-eth is required]
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
   Outputs a HEX_UNSIGNED_TRANSACTION, which encodes details about the desired
   transaction. It cannot be sent to the block chain until it is signed by the
@@ -96,21 +94,20 @@ offline-eth make-tx
 
 offline-eth sign-tx
     --tx=<HEX_UNSIGNED_TRANSACTION>            Transaction to sign [Required]
-    --key=<HEX_PRIVATE_KEY>                    Key to sign with [Requred]
+    --key=<HEX_PRIVATE_KEY>                    Key to sign with as a hex string
+                                               [Required]
 
-  Outputs a HEX_SIGNED_TRANSACTION, which extends th unsigned transaction by
+  Outputs a HEX_SIGNED_TRANSACTION, which extends the unsigned transaction by
   filling in several fields related to the signature. A signed transaction can
   be sent to the blockchain to be included.
 
 offline-eth print-tx
     --tx=<HEX_UNSIGNED_TRANSACTION |           Transaction to print [Required]
           HEX_SIGNED_TRANSACTION>
-    --online                                   If set, will use client_url to
-                                               lookup up details about the
-                                               addresses.
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --online                                   If set, will lookup up details
+                                               about the addresses on the
+                                               --chain.
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
   Outputs the transaction in JSON and some human readable details about
   the transaction to help a human confirm this transaction is correct. The
@@ -122,19 +119,15 @@ offline-eth print-tx
 
 offline-eth send-tx
     --tx=<HEX_SIGNED_TRANSACTION>              Transaction to send [Required]
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
-  This uses the client_url to send the signed transaction to be included on the
-  block chain.  It blocks until it is included, and prints details about the
-  transaction's inclusion when it happens.
+  This sends the signed transaction to the block chain. It blocks until it is
+  included, and prints details about the transaction's inclusion when it
+  happens.
 
 offline-eth balance
     --address=<HEX_PUBLIC_ADDRESS>             Address to lookup [Required]
-    --chain=<mainnet|sepolia|...>              Chain to use [Default: mainnet]
-    --client-url=<HTTP_ADDRESS>                URL of ETH client
-                                                 [Default: ankr.comr/rpc/...]
+    --chain=<mainnet|sepolia|goerli>           Chain to use [Default: mainnet]
 
   Outputs the balance and # of transaction for this address
 
@@ -142,14 +135,14 @@ offline-eth address
     --key=<HEX_PRIVATE_KEY>                    Key to get address for
 
   Outputs the HEX_PUBLIC_ADDRESS for this key.
-````
+```
 
 
 EXAMPLE
 =======
 Here is an example using it to move some funds around
 
-````
+```
 # First we make ourselves some keys using our offline-pc
 offline$ KEY_ONE=$(openssl rand -hex 32)
 offline$ KEY_TWO=$(openssl rand -hex 32)
@@ -256,4 +249,4 @@ online$ offline-eth send-tx --chain=sepolia --tx=0x02f87083aa36a7800184a3e9ab888
 }
 
 # Success! We just moved some ETH around!
-````
+```
